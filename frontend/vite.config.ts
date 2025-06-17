@@ -8,7 +8,7 @@ import vuetify from 'vite-plugin-vuetify'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: '/event-manager/',
+  base: '/event-manager/frontend/',
   plugins: [
     vue(),
     vueJsx(),
