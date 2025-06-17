@@ -1,0 +1,5 @@
+CREATE DATABASE event_tickets;
+CREATE USER admin WITH PASSWORD '123456';
+GRANT ALL PRIVILEGES ON DATABASE event_tickets TO admin;
+GRANT ALL ON SCHEMA public TO admin;
+ALTER DATABASE event_tickets OWNER TO admin;
