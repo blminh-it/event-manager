@@ -23,6 +23,9 @@ services:
     image: 'node:24-alpine3.21'
     working_dir: '/home/node/app'
     command: ["npm", "run", "start:dev"]
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
     env_file:
       - './backend/.env'
     volumes:

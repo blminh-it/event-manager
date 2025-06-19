@@ -1,9 +1,25 @@
-name: Deploy Vite Project to GitHub Pages
+name: Deploy Project to GitHub Pages
 
 on:
-  push:
-    branches:
-      - main
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy'
+        required: true
+        default: 'main'
+        type: string
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - development
+          - production
+          - staging
+        default: 'development'
 
 jobs:
   deploy:
