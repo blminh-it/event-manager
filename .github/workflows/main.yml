@@ -1,9 +1,6 @@
-name: Deploy Project to GitHub Pages
+name: Deploy Project
 
 on:
-  # push:
-  #   branches:
-  #     - main
   workflow_dispatch:
     inputs:
       branch:
@@ -16,37 +13,32 @@ on:
         required: true
         type: choice
         options:
-          - development
-          - production
-          - staging
-        default: 'development'
+          - dev
+          - stg
+        default: 'dev'
 
 jobs:
-  deploy:
+  trigger-frontend:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
+      - name: Trigger Frontend Pipeline
+        uses: benc-uk/workflow-dispatch@v1
         with:
-          node-version: 18
+          workflow: frontend.yml
+          token: ${{ secrets.GHA_CICD_TOKEN }}
+          ref: ${{ inputs.branch }}
+          inputs: |
+            {"branch": "${{ inputs.branch }}", "environment": "${{ inputs.environment }}"}
 
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-        working-directory: ./frontend
-
-      - name: Build project
-        run: pnpm run build
-        working-directory: ./frontend
-
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
+  trigger-backend:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Backend Pipeline
+        uses: benc-uk/workflow-dispatch@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/dist
+          workflow: backend.yml
+          token: ${{ secrets.GHA_CICD_TOKEN }}
+          ref: ${{ inputs.branch }}
+          inputs: |
+            {"branch": "${{ inputs.branch }}", "environment": "${{ inputs.environment }}"}
+

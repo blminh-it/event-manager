@@ -1,0 +1,133 @@
+name: Deploy frontend
+
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build'
+        required: true
+        default: 'main'
+        type: string
+      environment:
+        description: 'Environment to deploy'
+        required: true
+        type: choice
+        options:
+          - dev
+          - stg
+        default: 'dev'
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      DOCKER_IMAGE_NAME: event-ticket/frontend
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+      EC2_KNOWN_HOSTS: ${{ secrets.EC2_KNOWN_HOSTS }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
+
+      - name: Get SHORT_SHA env
+        run: echo "SHORT_SHA=`echo ${GITHUB_SHA} | cut -c1-7`" >> $GITHUB_ENV
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+
+      # Cache pnpm dependencies
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: '8.6.2'
+          run_install: false
+
+      # Set up Docker Buildx
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Cache Docker layers
+      - name: Cache Docker layers
+        uses: actions/cache@v4
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-docker-${{ env.SHORT_SHA }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+
+      # Build Docker image
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/docker/Dockerfile
+          push: false
+          tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          load: true
+
+      - name: Move cache
+        run: |
+          rm -rf /tmp/.buildx-cache
+          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+
+      # Install SSH key
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.EC2_SSH_KEY }}
+          known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
+
+      # Export and transfer image to EC2
+      # - name: Transfer image to EC2
+      #   run: |
+      #     docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }} | bzip2 | ssh ${{ env.EC2_USERNAME }}@${{ env.EC2_HOST }} "docker load"
+
+      # Deploy container
+      # - name: Deploy on EC2
+      #   uses: appleboy/ssh-action@v1
+      #   with:
+      #     host: ${{ env.EC2_HOST }}
+      #     username: ${{ env.EC2_USERNAME }}
+      #     key: ${{ env.EC2_SSH_KEY }}
+          # script: |
+          #   cd /home/ec2-user/epia/core/deployment/_${{ inputs.environment }}
+          #   git checkout ${{ inputs.branch }}
+          #   git pull
+            
+          #   # Update Docker image tag and redeploy
+          #   previousVersion=$(grep "EPIA_FRONTEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
+          #   previousTag="${{ env.DOCKER_IMAGE_NAME }}:${previousVersion}"
+          #   newTag="${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}"
+          #   echo "Going to replace previousTag=${previousTag} by ${newTag}" 
+          #   sed -i "s#${previousTag}#${newTag}#g" .env
+          #   # cat .env
+          #   docker-compose -f 02_docker-compose_epia.yml -p core up --force-recreate -d frontend && docker restart public-nginx
+          #   sleep 10
+
+          #   # Cleanup prior images to save space.
+          #   # Only keep the last 2 images to allow rollback.
+          #   docker images | grep "${{ env.DOCKER_IMAGE_NAME }}" | grep -v -e "${previousVersion}\|${{ env.SHORT_SHA }}" | awk '//{print $3}' | xargs -I {} docker rmi -f "{}" || true
+
+
+      # - name: Install dependencies
+      #   run: pnpm install
+      #   working-directory: ./frontend
+
+      # - name: Build project
+      #   run: pnpm run build
+      #   working-directory: ./frontend
+
+      # - name: Deploy to GitHub Pages
+      #   uses: peaceiris/actions-gh-pages@v3
+      #   with:
+      #     github_token: ${{ secrets.GITHUB_TOKEN }}
+      #     publish_dir: ./frontend/dist
