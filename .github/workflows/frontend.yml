@@ -87,21 +87,21 @@ jobs:
           known_hosts: ${{ secrets.EC2_KNOWN_HOSTS }}
 
       # Export and transfer image to EC2
-      # - name: Transfer image to EC2
-      #   run: |
-      #     docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }} | bzip2 | ssh ${{ env.EC2_USERNAME }}@${{ env.EC2_HOST }} "docker load"
+      - name: Transfer image to EC2
+        run: |
+          docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }} | bzip2 | ssh ${{ env.EC2_USERNAME }}@${{ env.EC2_HOST }} "docker load"
 
       # Deploy container
-      # - name: Deploy on EC2
-      #   uses: appleboy/ssh-action@v1
-      #   with:
-      #     host: ${{ env.EC2_HOST }}
-      #     username: ${{ env.EC2_USERNAME }}
-      #     key: ${{ env.EC2_SSH_KEY }}
-          # script: |
-          #   cd /home/ec2-user/epia/core/deployment/_${{ inputs.environment }}
-          #   git checkout ${{ inputs.branch }}
-          #   git pull
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USERNAME }}
+          key: ${{ env.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/event-tickets
+            git checkout ${{ inputs.branch }}
+            git pull
             
           #   # Update Docker image tag and redeploy
           #   previousVersion=$(grep "EPIA_FRONTEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')

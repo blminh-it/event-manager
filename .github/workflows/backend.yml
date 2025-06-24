@@ -83,31 +83,31 @@ jobs:
           known_hosts: ${{ env.EC2_KNOWN_HOSTS }}
 
       # Export and transfer image to EC2
-      # - name: Transfer image to EC2
-      #   run: |
-      #     docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }} | bzip2 | ssh ${{ env.EC2_USERNAME }}@${{ env.EC2_HOST }} "docker load"
+      - name: Transfer image to EC2
+        run: |
+          docker save ${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }} | bzip2 | ssh ${{ env.EC2_USERNAME }}@${{ env.EC2_HOST }} "docker load"
 
       # Deploy container
-      # - name: Deploy on EC2
-      #   uses: appleboy/ssh-action@v1
-      #   with:
-      #     host: ${{ env.EC2_HOST }}
-      #     username: ${{ env.EC2_USERNAME }}
-      #     key: ${{ env.EC2_SSH_KEY }}
-          # script: |
-          #   cd /home/ec2-user/epia/core/deployment/_${{ inputs.environment }}
-          #   git checkout ${{ inputs.branch }}
-          #   git pull
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USERNAME }}
+          key: ${{ env.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/event-tickets
+            git checkout ${{ inputs.branch }}
+            git pull
             
-          #   # Update Docker image tag and redeploy
-          #   previousVersion=$(grep "EPIA_BACKEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
-          #   previousTag="${{ env.DOCKER_IMAGE_NAME }}:${previousVersion}"
-          #   newTag="${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}"
-          #   echo "Going to replace previousTag=${previousTag} by ${newTag}" 
-          #   sed -i "s#${previousTag}#${newTag}#g" .env
-          #   # cat .env
-          #   docker-compose -f 02_docker-compose_epia.yml -p core up --force-recreate -d backend && docker restart public-nginx
-          #   sleep 10
+            # # Update Docker image tag and redeploy
+            # previousVersion=$(grep "EPIA_BACKEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
+            # previousTag="${{ env.DOCKER_IMAGE_NAME }}:${previousVersion}"
+            # newTag="${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}"
+            # echo "Going to replace previousTag=${previousTag} by ${newTag}" 
+            # sed -i "s#${previousTag}#${newTag}#g" .env
+            # # cat .env
+            # docker-compose -f 02_docker-compose_epia.yml -p core up --force-recreate -d backend && docker restart public-nginx
+            # sleep 10
             
           #   # Run DB migration
           #   cd /home/ec2-user/epia/core/backend
