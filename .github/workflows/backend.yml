@@ -95,9 +95,15 @@ jobs:
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_SSH_KEY }}
           script: |
-            cd /home/ec2-user/event-tickets
-            git checkout ${{ inputs.branch }}
-            git pull
+            cd /home/ec2-user
+            if [ ! -d "event-tickets" ]; then
+              git clone git@github.com:blminh-it/event-manager.git event-tickets
+            else
+              cd event-tickets
+              git checkout ${{ inputs.branch }}
+              git pull
+            fi
+            cd event-tickets
             
           # # Update Docker image tag and redeploy
           # previousVersion=$(grep "EPIA_BACKEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
