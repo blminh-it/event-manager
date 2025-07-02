@@ -23,17 +23,27 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
-      
-      - name: Pull latest code from GitHub repo
+
+      - name: Checkout this workflow repo
+        uses: actions/checkout@v4
+
+      - name: Setup SSH key
         run: |
           echo "$EC2_SSH_KEY" > key.pem
-          echo "Using SSH key for connection"
-          echo "EC2 Username: $EC2_USERNAME"
-          echo "EC2 Host: $EC2_HOST"
-          echo "SSH command to connect ..."
-          echo "ssh -i key.pem $EC2_USERNAME@$EC2_HOST"
           chmod 600 key.pem
+          echo "SSH key setup complete."
+        env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
 
+      - name: Add EC2 host to known hosts
+        run: |
+          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+          echo "EC2 host added to known hosts."
+        env:
+          EC2_HOST: ${{ secrets.EC2_HOST }}
+
+      - name: Pull latest code from GitHub repo
+        run: |
           ssh -o StrictHostKeyChecking=no -i key.pem "$EC2_USERNAME@$EC2_HOST" << 'EOF'
             set -e
             PROJECT_DIR="/home/ec2-user/event-tickets"
@@ -46,6 +56,5 @@ jobs:
             git pull origin main
           EOF
         env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
