@@ -26,7 +26,7 @@ jobs:
           ref: ${{ inputs.branch }}
 
       - name: Setup SSH key
-        uses: shimataro/setup-ssh-key@v2
+        uses: shimataro/ssh-key-action@v2
         with:
           key: ${{ env.EC2_SSH_KEY }}
           known_hosts: ${{ env.EC2_KNOWN_HOSTS }}
