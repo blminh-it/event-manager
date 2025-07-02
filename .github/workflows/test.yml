@@ -18,7 +18,7 @@ jobs:
         run: |
           echo "$EC2_SSH_KEY" > key.pem
           chmod 600 key.pem
-          ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USERNAME@$EC2_HOST "uptime"
+          ssh -o StrictHostKeyChecking=no -i key.pem "$EC2_USERNAME@$EC2_HOST" "uptime"
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
@@ -27,6 +27,8 @@ jobs:
       - name: Pull latest code from GitHub repo
         run: |
           echo "ssh -i key.pem $EC2_USERNAME@$EC2_HOST"
+          echo "$EC2_SSH_KEY" > key.pem
+          chmod 600 key.pem
 
           ssh -o StrictHostKeyChecking=no -i key.pem "$EC2_USERNAME@$EC2_HOST" << 'EOF'
             set -e
@@ -40,5 +42,6 @@ jobs:
             git pull origin main
           EOF
         env:
+          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
