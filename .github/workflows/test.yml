@@ -38,18 +38,14 @@ jobs:
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_SSH_KEY }}
           script: |
-            ssh -o StrictHostKeyChecking=no -i key.pem "${{ env.EC2_USERNAME }}@${{ env.EC2_HOST }}" << 'EOF'
-              set -e
-              cd /home/ec2-user"
+            cd /home/ec2-user
+            if [ ! -d "event-tickets" ]; then
+              echo "Project directory does not exist. Cloning repository..."
+              git clone git@github.com:blminh-it/event-manager.git "event-tickets"
+            fi
 
-              if [ ! -d "event-tickets" ]; then
-                echo "Project directory does not exist. Cloning repository..."
-                git clone git@github.com:blminh-it/event-manager.git "event-tickets"
-              fi
-              
-              cd "event-tickets"
-              git pull origin main
-            EOF
+            cd "event-tickets"
+            git pull origin main
 
       # - name: Add EC2 host to known hosts
       #   run: |
