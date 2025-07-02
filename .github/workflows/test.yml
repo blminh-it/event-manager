@@ -12,49 +12,60 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    
+    env:
+      EC2_HOST: ${{ secrets.EC2_HOST }}
+      EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
+      EC2_KNOWN_HOSTS: ${{ secrets.EC2_KNOWN_HOSTS }}
+      EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
 
     steps:
-      - name: Connect to EC2 and run uptime
-        run: |
-          echo "$EC2_SSH_KEY" > key.pem
-          chmod 600 key.pem
-          ssh -o StrictHostKeyChecking=no -i key.pem "$EC2_USERNAME@$EC2_HOST" "uptime"
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
-          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
-
       - name: Checkout this workflow repo
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
 
       - name: Setup SSH key
-        run: |
-          echo "$EC2_SSH_KEY" > key.pem
-          chmod 600 key.pem
-          echo "SSH key setup complete."
-        env:
-          EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
+        uses: shimataro/setup-ssh-key@v2
+        with:
+          key: ${{ env.EC2_SSH_KEY }}
+          known_hosts: ${{ env.EC2_KNOWN_HOSTS }}
 
-      - name: Add EC2 host to known hosts
-        run: |
-          ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
-          echo "EC2 host added to known hosts."
-        env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
+      - name: Deploy on EC2
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USERNAME }}
+          key: ${{ env.EC2_SSH_KEY }}
+          script: |
+            ssh -o StrictHostKeyChecking=no -i key.pem "${{ env.EC2_USERNAME }}@${{ env.EC2_HOST }}" << 'EOF'
+              set -e
+              cd /home/ec2-user"
 
-      - name: Pull latest code from GitHub repo
-        run: |
-          ssh -o StrictHostKeyChecking=no -i key.pem "$EC2_USERNAME@$EC2_HOST" << 'EOF'
-            set -e
-            PROJECT_DIR="/home/ec2-user/event-tickets"
+              if [ ! -d "event-tickets" ]; then
+                echo "Project directory does not exist. Cloning repository..."
+                git clone git@github.com:blminh-it/event-manager.git "event-tickets"
+              fi
+              
+              cd "event-tickets"
+              git pull origin main
+            EOF
 
-            if [ ! -d "$PROJECT_DIR" ]; then
-              echo "Project directory does not exist. Cloning repository..."
-              git clone git@github.com:blminh-it/event-manager.git "$PROJECT_DIR"
-            fi
-            cd "$PROJECT_DIR"
-            git pull origin main
-          EOF
-        env:
-          EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
-          EC2_HOST: ${{ secrets.EC2_HOST }}
+      # - name: Add EC2 host to known hosts
+      #   run: |
+      #     ssh-keyscan -H "$EC2_HOST" >> ~/.ssh/known_hosts
+      #     echo "EC2 host added to known hosts."
+
+      # - name: Pull latest code from GitHub repo
+      #   run: |
+      #     ssh -o StrictHostKeyChecking=no -i key.pem "$EC2_USERNAME@$EC2_HOST" << 'EOF'
+      #       set -e
+      #       PROJECT_DIR="/home/ec2-user/event-tickets"
+
+      #       if [ ! -d "$PROJECT_DIR" ]; then
+      #         echo "Project directory does not exist. Cloning repository..."
+      #         git clone git@github.com:blminh-it/event-manager.git "$PROJECT_DIR"
+      #       fi
+      #       cd "$PROJECT_DIR"
+      #       git pull origin main
+      #     EOF
