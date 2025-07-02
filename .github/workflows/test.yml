@@ -41,10 +41,10 @@ jobs:
             cd /home/ec2-user
             if [ ! -d "event-tickets" ]; then
               echo "Project directory does not exist. Cloning repository..."
-              git clone git@github.com:blminh-it/event-manager.git "event-tickets"
+              git clone git@github.com:blminh-it/event-manager.git event-tickets
             fi
 
-            cd "event-tickets"
+            cd event-tickets
             git pull origin main
 
       # - name: Add EC2 host to known hosts
