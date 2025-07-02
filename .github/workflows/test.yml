@@ -26,8 +26,12 @@ jobs:
       
       - name: Pull latest code from GitHub repo
         run: |
-          echo "ssh -i key.pem $EC2_USERNAME@$EC2_HOST"
           echo "$EC2_SSH_KEY" > key.pem
+          echo "Using SSH key for connection"
+          echo "EC2 Username: $EC2_USERNAME"
+          echo "EC2 Host: $EC2_HOST"
+          echo "SSH command to connect ..."
+          echo "ssh -i key.pem $EC2_USERNAME@$EC2_HOST"
           chmod 600 key.pem
 
           ssh -o StrictHostKeyChecking=no -i key.pem "$EC2_USERNAME@$EC2_HOST" << 'EOF'
