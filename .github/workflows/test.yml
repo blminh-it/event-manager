@@ -23,3 +23,18 @@ jobs:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
+      
+      - name: Pull latest code from GitHub repo
+        run: |
+          ssh -o StrictHostKeyChecking=no -i key.pem $EC2_USERNAME@$EC2_HOST << 'EOF'
+            set -e
+
+            PROJECT_DIR="/home/ec2-user/event-tickets"
+
+            if [ ! -d "$PROJECT_DIR" ]; then
+              echo "Project directory does not exist. Cloning repository..."
+              git clone git@github.com:blminh-it/event-manager.git "$PROJECT_DIR"
+            fi
+            cd "$PROJECT_DIR"
+            git pull origin main
+          EOF
