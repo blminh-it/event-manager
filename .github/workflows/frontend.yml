@@ -99,7 +99,7 @@ jobs:
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_SSH_KEY }}
           script: |
-            cd /home/ec2-user/event-tickets
+            cd /home/ec2-user/event-manager
             git checkout ${{ inputs.branch }}
             git pull
             
