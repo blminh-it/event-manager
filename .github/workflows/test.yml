@@ -12,7 +12,7 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-    
+
     env:
       EC2_HOST: ${{ secrets.EC2_HOST }}
       EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
@@ -38,14 +38,18 @@ jobs:
           username: ${{ env.EC2_USERNAME }}
           key: ${{ env.EC2_SSH_KEY }}
           script: |
-            cd /home/ec2-user
-            if [ ! -d "event-tickets" ]; then
-              echo "Project directory does not exist. Cloning repository..."
-              git clone git@github.com:blminh-it/event-manager.git event-tickets
-            fi
+            echo "Pull repository..."
+            cd /home/ec2-user/event-manager
+            git checkout ${{ inputs.branch }}
+            git pull
+          
+          # if [ ! -d "event-tickets" ]; then
+          #   echo "Project directory does not exist. Cloning repository..."
+          #   git clone git@github.com:blminh-it/event-manager.git event-tickets
+          # fi
 
-            cd event-tickets
-            git pull origin main
+          # cd event-tickets
+          # git pull origin main
 
       # - name: Add EC2 host to known hosts
       #   run: |
