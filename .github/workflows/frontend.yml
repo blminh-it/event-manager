@@ -58,8 +58,8 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ../frontend
-          file: ../frontend/docker/Dockerfile
+          context: ./frontend
+          file: ./frontend/docker/Dockerfile
           push: false
           tags: ${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}
           cache-from: type=local,src=/tmp/.buildx-cache
