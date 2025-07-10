@@ -95,7 +95,7 @@ jobs:
             
             # Update Docker image tag and redeploy
             cd deployment
-            previousVersion=$(grep "EPIA_BACKEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
+            previousVersion=$(grep "EVENT_MANAGER_BACKEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
             previousTag="${{ env.DOCKER_IMAGE_NAME }}:${previousVersion}"
             newTag="${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}"
             echo "Going to replace previousTag=${previousTag} by ${newTag}"
