@@ -10,6 +10,7 @@ services:
       - 'POSTGRES_PASSWORD=${EVENT_MANAGER_POSTGRES_USER_PASSWORD}'
       - 'PGDATA=/data/postgres'
     volumes:
+      - '../data/postgres/data:/data/postgres'
       - '../data/postgres/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql'
     ports:
       - '6432:5432'
@@ -35,33 +36,34 @@ services:
     container_name: 'event-backend'
     hostname: 'event-backend'
     restart: 'unless-stopped'
-    image: 'node:24-alpine3.21'
-    working_dir: '/home/node/app'
-    command: ["npm", "run", "start:dev"]
-    build:
-      context: ../backend
-      dockerfile: docker/Dockerfile
-    env_file:
-      - '../backend/.env'
+    image: '${EVENT_MANAGER_BACKEND_DOCKER_IMAGE}'
+    # working_dir: '/home/node/app'
+    # build:
+    #   context: ../backend
+    #   dockerfile: docker/Dockerfile
+    # env_file:
+    #   - '../backend/.env'
     volumes:
-      - '../backend:/home/node/app'
+      - '../backend/.env:/home/node/app/.env'
+      - '../backend/tsconfig.json:/home/node/app/tsconfig.json'
     ports:
       - '6000:3000'
     networks:
       - 'event_manager_network'
-    depends_on:
-      - postgres
+    # depends_on:
+    #   - postgres
 
   frontend:
     container_name: 'event-frontend'
     hostname: 'event-frontend'
     restart: 'unless-stopped'
-    build:
-      context: ../frontend
-      dockerfile: docker/Dockerfile
-    volumes:
-      - '../frontend:/home/node/app'
-      - /home/node/app/node_modules
+    image: '${EVENT_MANAGER_FRONTEND_DOCKER_IMAGE}'
+    # build:
+    #   context: ../frontend
+    #   dockerfile: docker/Dockerfile
+    # volumes:
+    #   - '../frontend:/home/node/app'
+    #   - /home/node/app/node_modules
     ports:
       - '6173:5173'
     networks:
