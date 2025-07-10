@@ -8,14 +8,6 @@ on:
         required: true
         default: 'main'
         type: string
-      environment:
-        description: 'Environment to deploy'
-        required: true
-        type: choice
-        options:
-          - dev
-          - stg
-        default: 'dev'
 
 jobs:
   trigger-frontend:
@@ -28,7 +20,7 @@ jobs:
           token: ${{ secrets.GHA_CICD_TOKEN }}
           ref: ${{ inputs.branch }}
           inputs: |
-            {"branch": "${{ inputs.branch }}", "environment": "${{ inputs.environment }}"}
+            {"branch": "${{ inputs.branch }}"}
 
   trigger-backend:
     runs-on: ubuntu-latest
@@ -40,5 +32,4 @@ jobs:
           token: ${{ secrets.GHA_CICD_TOKEN }}
           ref: ${{ inputs.branch }}
           inputs: |
-            {"branch": "${{ inputs.branch }}", "environment": "${{ inputs.environment }}"}
-
+            {"branch": "${{ inputs.branch }}"}

@@ -95,31 +95,17 @@ jobs:
             git checkout ${{ inputs.branch }}
             git pull
             
-          #   # Update Docker image tag and redeploy
-          #   previousVersion=$(grep "EPIA_FRONTEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
-          #   previousTag="${{ env.DOCKER_IMAGE_NAME }}:${previousVersion}"
-          #   newTag="${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}"
-          #   echo "Going to replace previousTag=${previousTag} by ${newTag}" 
-          #   sed -i "s#${previousTag}#${newTag}#g" .env
-          #   # cat .env
-          #   docker-compose -f 02_docker-compose_epia.yml -p core up --force-recreate -d frontend && docker restart public-nginx
-          #   sleep 10
+            # Update Docker image tag and redeploy
+            previousVersion=$(grep "EVENT_MANAGER_FRONTEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
+            previousTag="${{ env.DOCKER_IMAGE_NAME }}:${previousVersion}"
+            newTag="${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}"
+            echo "Going to replace previousTag=${previousTag} by ${newTag}" 
+            sed -i "s#${previousTag}#${newTag}#g" .env
+            # cat .env
+            docker-compose -f docker-compose.yml -p core up --force-recreate -d frontend
+            sleep 10
 
           #   # Cleanup prior images to save space.
           #   # Only keep the last 2 images to allow rollback.
           #   docker images | grep "${{ env.DOCKER_IMAGE_NAME }}" | grep -v -e "${previousVersion}\|${{ env.SHORT_SHA }}" | awk '//{print $3}' | xargs -I {} docker rmi -f "{}" || true
 
-
-      # - name: Install dependencies
-      #   run: pnpm install
-      #   working-directory: ./frontend
-
-      # - name: Build project
-      #   run: pnpm run build
-      #   working-directory: ./frontend
-
-      # - name: Deploy to GitHub Pages
-      #   uses: peaceiris/actions-gh-pages@v3
-      #   with:
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     publish_dir: ./frontend/dist
