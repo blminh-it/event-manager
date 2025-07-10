@@ -8,21 +8,13 @@ on:
         required: true
         default: 'main'
         type: string
-      environment:
-        description: 'Environment to deploy'
-        required: true
-        type: choice
-        options:
-          - dev
-          - stg
-        default: 'dev'
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     env:
-      DOCKER_IMAGE_NAME: event-ticket/frontend
+      DOCKER_IMAGE_NAME: event-manager/frontend
       EC2_HOST: ${{ secrets.EC2_HOST }}
       EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
       EC2_KNOWN_HOSTS: ${{ secrets.EC2_KNOWN_HOSTS }}
