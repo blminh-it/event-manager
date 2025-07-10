@@ -97,9 +97,9 @@ jobs:
             previousVersion=$(grep "EPIA_BACKEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
             previousTag="${{ env.DOCKER_IMAGE_NAME }}:${previousVersion}"
             newTag="${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}"
-            echo "Going to replace previousTag=${previousTag} by ${newTag}" 
+            echo "Going to replace previousTag=${previousTag} by ${newTag}"
             sed -i "s#${previousTag}#${newTag}#g" .env
-            docker-compose -f docker-compose.yml -p event-manager up --force-recreate -d backend && docker restart public-nginx
+            docker-compose -f docker-compose.yml -p event-manager up --force-recreate -d backend && docker restart public-nginx-event
             sleep 10
           
           # # Run DB migration
