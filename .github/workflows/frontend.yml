@@ -102,7 +102,7 @@ jobs:
             echo "Going to replace previousTag=${previousTag} by ${newTag}" 
             sed -i "s#${previousTag}#${newTag}#g" .env
             # cat .env
-            docker-compose -f docker-compose.yml -p core up --force-recreate -d frontend
+            docker-compose -f docker-compose.yml -p event-manager up --force-recreate -d frontend
             sleep 10
 
           #   # Cleanup prior images to save space.
