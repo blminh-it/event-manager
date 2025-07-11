@@ -96,6 +96,7 @@ jobs:
             git pull
             
             # Update Docker image tag and redeploy
+            cd deployment
             previousVersion=$(grep "EVENT_MANAGER_FRONTEND_DOCKER_IMAGE" .env | grep -o '[^:]*$')
             previousTag="${{ env.DOCKER_IMAGE_NAME }}:${previousVersion}"
             newTag="${{ env.DOCKER_IMAGE_NAME }}:${{ env.SHORT_SHA }}"
