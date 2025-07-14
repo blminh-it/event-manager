@@ -28,7 +28,7 @@ services:
     volumes:
       - './nginx/nginx.conf:/etc/nginx/nginx.conf'
       - './nginx/conf.d:/etc/nginx/conf.d'
-      - './nginx/certs:/etc/nginx/certs'
+      # - './nginx/certs:/etc/nginx/certs'
     networks:
       - 'event_manager_network'
 
@@ -37,12 +37,6 @@ services:
     hostname: 'event-backend'
     restart: 'unless-stopped'
     image: '${EVENT_MANAGER_BACKEND_DOCKER_IMAGE}'
-    # working_dir: '/home/node/app'
-    # build:
-    #   context: ../backend
-    #   dockerfile: docker/Dockerfile
-    # env_file:
-    #   - '../backend/.env'
     volumes:
       - '../backend/.env:/home/node/app/.env'
       - '../backend/tsconfig.json:/home/node/app/tsconfig.json'
@@ -58,9 +52,6 @@ services:
     hostname: 'event-frontend'
     restart: 'unless-stopped'
     image: '${EVENT_MANAGER_FRONTEND_DOCKER_IMAGE}'
-    # build:
-    #   context: ../frontend
-    #   dockerfile: docker/Dockerfile
     volumes:
       - '../frontend:/home/node/app'
       - 'node_modules_fe:/home/node/app/node_modules'
