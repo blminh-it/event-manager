@@ -1,0 +1,23 @@
+services:
+  postgres:
+    container_name: 'event-postgres'
+    hostname: 'event-postgres'
+    restart: 'unless-stopped'
+    image: 'postgres:16-alpine'
+    environment:
+      - 'POSTGRES_USER=${EVENT_MANAGER_POSTGRES_USER_USERNAME}'
+      - 'PGUSER=${EVENT_MANAGER_POSTGRES_USER_USERNAME}'
+      - 'POSTGRES_PASSWORD=${EVENT_MANAGER_POSTGRES_USER_PASSWORD}'
+      - 'PGDATA=/data/postgres'
+    volumes:
+      - './_data/postgres/data:/data/postgres'
+      - './_data/postgres/postgres_init.sql:/docker-entrypoint-initdb.d/init.sql'
+    ports:
+      - '8432:5432'
+    networks:
+      - 'event_manager_network'
+
+networks:
+  event_manager_network:
+    name: 'event_manager_network'
+    external: true

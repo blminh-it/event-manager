@@ -1,0 +1,34 @@
+services:
+  backend:
+    container_name: 'event-backend'
+    hostname: 'event-backend'
+    restart: 'unless-stopped'
+    image: '${EVENT_MANAGER_BACKEND_DOCKER_IMAGE}'
+    volumes:
+      - '../backend/.env:/home/node/app/.env'
+      - '../backend/tsconfig.json:/home/node/app/tsconfig.json'
+    ports:
+      - '8000:3000'
+    networks:
+      - 'event_manager_network'
+
+  frontend:
+    container_name: 'event-frontend'
+    hostname: 'event-frontend'
+    restart: 'unless-stopped'
+    image: '${EVENT_MANAGER_FRONTEND_DOCKER_IMAGE}'
+    volumes:
+      - '../frontend:/home/node/app'
+      - 'node_modules_fe:/home/node/app/node_modules'
+    ports:
+      - '8173:5173'
+    networks:
+      - 'event_manager_network'
+
+networks:
+  event_manager_network:
+    name: 'event_manager_network'
+    external: true
+
+volumes:
+  node_modules_fe: {}
