@@ -99,8 +99,8 @@ sleep 1
 
 # NGINX gateway
 info " * Deploy NGINX gateway"
-cp public-nginx/nginx_basic_auth _data/nginx/nginx_basic_auth
-cp public-nginx/nginx.conf.example _data/nginx/nginx.conf
+# cp public-nginx/nginx_basic_auth _data/nginx/nginx_basic_auth
+cp nginx/nginx.conf.example _data/nginx/nginx.conf
 sed -i "s/@EVENT_MANAGER_FRONTEND_EXTERNAL_DOMAIN/${EVENT_MANAGER_FRONTEND_EXTERNAL_DOMAIN}/g" _data/nginx/nginx.conf
 sed -i "s/@EVENT_MANAGER_BACKEND_EXTERNAL_DOMAIN/${EVENT_MANAGER_BACKEND_EXTERNAL_DOMAIN}/g" _data/nginx/nginx.conf
 debug "   > nginx.conf configured"
