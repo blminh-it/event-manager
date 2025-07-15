@@ -1,0 +1,7 @@
+.DS_Store
+
+_tmp/
+.idea/
+
+out/
+uploads/
